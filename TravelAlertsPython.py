@@ -6,6 +6,14 @@ import html
 import datetime
 from email.header import decode_header
 import config
+import socket
+import os.path
+import sys
+import struct
+import fcntl
+import os
+import time
+import liquidcrystal_i2c
 
 last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 server = 'imap.gmail.com'
