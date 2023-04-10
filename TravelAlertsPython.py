@@ -18,6 +18,7 @@ import liquidcrystal_i2c
 last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 server = 'imap.gmail.com'
 
+
 def fetch_mail():
     # Connect to the IMAP server
     imap_server = imaplib.IMAP4_SSL(server)
@@ -36,7 +37,8 @@ def fetch_mail():
         message = email.message_from_bytes(message_data[0][1])
         subject = decode_header(message['Subject'])[0][0]
         if "THIS WEEK'S TOP 20" in subject.upper():
-            target_message_body = message.get_payload(decode=True).decode('utf-8')
+            target_message_body = message.get_payload(
+                decode=True).decode('utf-8')
             break
 
     # Close the mailbox and logout
@@ -44,6 +46,7 @@ def fetch_mail():
     imap_server.logout()
 
     return target_message_body
+
 
 def filter_matches():
     # Use regex to find the deals that are formatted like we expect
@@ -57,6 +60,7 @@ def filter_matches():
             filtered_matches.append(html.unescape(match))
 
     return filtered_matches
+
 
 def display_deal_list(deal_list):
     for deal in deal_list:
