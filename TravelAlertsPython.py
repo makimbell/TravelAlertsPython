@@ -6,18 +6,10 @@ import html
 import datetime
 from email.header import decode_header
 import config
-import socket
-import os.path
-import sys
-import struct
-import fcntl
-import os
-import time
 import liquidcrystal_i2c
 
 last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 server = 'imap.gmail.com'
-
 
 def fetch_mail():
     # Connect to the IMAP server
@@ -47,7 +39,6 @@ def fetch_mail():
 
     return target_message_body
 
-
 def filter_matches():
     # Use regex to find the deals that are formatted like we expect
     pattern = r'\$.+?(?=\s<)'
@@ -61,13 +52,22 @@ def filter_matches():
 
     return filtered_matches
 
-
 def display_deal_list(deal_list):
-    for deal in deal_list:
-        if config.DEBUG:
+    if config.DEBUG:
+        for deal in deal_list:
             print(deal)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
+    if config.DEVICE_CONNECTED:
+        cols = 20
+        rows = 4
+        lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
 
+        for deal in deal_list:
+            lcd.clear()
+            lcd.printline(0, deal)
+            ##lcd.printline(1, 'and'.center(cols))
+            ##lcd.printline(2, 'python-')
+            lcd.printline(3, 'liquidcrystal_i2c'.rjust(cols))
 
 while True:
 
