@@ -11,4 +11,5 @@ EMAIL_ADDRESS = "[email]"
 PASSWORD = "[password]"
 DEBUG = True
 DISPLAY_TIMER_SECONDS = 5
+DEVICE_CONNECTED = False
 ```
