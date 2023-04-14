@@ -6,6 +6,7 @@ import html
 import datetime
 from email.header import decode_header
 import config
+import liquidcrystal_i2c
 
 last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 server = 'imap.gmail.com'
@@ -28,7 +29,8 @@ def fetch_mail():
         message = email.message_from_bytes(message_data[0][1])
         subject = decode_header(message['Subject'])[0][0]
         if "THIS WEEK'S TOP 20" in subject.upper():
-            target_message_body = message.get_payload(decode=True).decode('utf-8')
+            target_message_body = message.get_payload(
+                decode=True).decode('utf-8')
             break
 
     # Close the mailbox and logout
@@ -54,8 +56,13 @@ def display_deal_list(deal_list):
     for deal in deal_list:
         if config.DEBUG:
             print(deal)
+        if config.DEVICE_CONNECTED:
+            cols = 20
+            rows = 4
+            lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
+            lcd.clear()
+            lcd.printline(0, deal.center(cols))
         time.sleep(config.DISPLAY_TIMER_SECONDS)
-
 
 while True:
 
