@@ -6,7 +6,7 @@ import html
 import datetime
 from email.header import decode_header
 import config
-##import liquidcrystal_i2c
+import liquidcrystal_i2c
 
 last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 server = 'imap.gmail.com'
@@ -53,21 +53,16 @@ def filter_matches():
     return filtered_matches
 
 def display_deal_list(deal_list):
-    if config.DEBUG:
-        for deal in deal_list:
+    for deal in deal_list:
+        if config.DEBUG:
             print(deal)
-            time.sleep(config.DISPLAY_TIMER_SECONDS)
-    # if config.DEVICE_CONNECTED:
-    #     cols = 20
-    #     rows = 4
-    #     lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
-
-    #     for deal in deal_list:
-    #         lcd.clear()
-    #         lcd.printline(0, deal)
-    #         ##lcd.printline(1, 'and'.center(cols))
-    #         ##lcd.printline(2, 'python-')
-    #         lcd.printline(3, 'liquidcrystal_i2c'.rjust(cols))
+        if config.DEVICE_CONNECTED:
+            cols = 20
+            rows = 4
+            lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
+            lcd.clear()
+            lcd.printline(0, deal.center(cols))
+        time.sleep(config.DISPLAY_TIMER_SECONDS)
 
 while True:
 
