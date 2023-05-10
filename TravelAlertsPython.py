@@ -27,8 +27,8 @@ def fetch_mail():
     for message_id in message_ids[0].split()[::-1]:
         result, message_data = imap_server.fetch(message_id, '(RFC822)')
         message = email.message_from_bytes(message_data[0][1])
-        subject = decode_header(message['Subject'])[0][0]
-        if "THIS WEEK'S TOP 20" in subject.upper():
+        subject = decode_header(message['Subject']).__str__().upper()
+        if "TOP 20" in subject.upper():
             target_message_body = message.get_payload(
                 decode=True).decode('utf-8')
             break
@@ -47,7 +47,8 @@ def filter_matches():
     filtered_matches = []
 
     for match in matches:
-        if '--' in match:
+        if "—" in match:
+            match = match.replace('—', ' -- ')
             filtered_matches.append(html.unescape(match))
 
     return filtered_matches
@@ -60,8 +61,7 @@ def display_deal_list(deal_list):
             cols = 20
             rows = 4
             lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
-            lcd.clear()
-            lcd.printline(0, deal.center(cols))
+            lcd.printline(0, deal)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
 
 while True:
