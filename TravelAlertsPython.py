@@ -27,8 +27,8 @@ def fetch_mail():
     for message_id in message_ids[0].split()[::-1]:
         result, message_data = imap_server.fetch(message_id, '(RFC822)')
         message = email.message_from_bytes(message_data[0][1])
-        subject = decode_header(message['Subject'])[0][0]
-        if "THIS WEEK'S TOP 20" in subject.upper():
+        subject = decode_header(message['Subject']).__str__().upper()
+        if "TOP 20" in subject.upper():
             target_message_body = message.get_payload(
                 decode=True).decode('utf-8')
             break
@@ -47,7 +47,8 @@ def filter_matches():
     filtered_matches = []
 
     for match in matches:
-        if '--' in match:
+        if "—" in match:
+            match = match.replace('—', ' -- ')
             filtered_matches.append(html.unescape(match))
 
     return filtered_matches
@@ -59,9 +60,42 @@ def display_deal_list(deal_list):
         if config.DEVICE_CONNECTED:
             cols = 20
             rows = 4
+
+            currentRow = 1
+            row1 = ""
+            row2 = ""
+            row3 = ""
+            row4 = ""
+
+            dealWords = deal.split()
+            for word in dealWords:
+                if currentRow == 1:
+                    if len(row1) + len(word) < 20:
+                        row1 = row1 + word + " "
+                    else:
+                        currentRow += 1
+                if currentRow == 2:
+                    if len(row2) + len(word) < 20:
+                        row2 = row2 + word + " "
+                    else:
+                        currentRow += 1
+                if currentRow == 3:
+                    if len(row3) + len(word) < 20:
+                        row3 = row3 + word + " "
+                    else:
+                        currentRow += 1
+                if currentRow == 4:
+                    if len(row4) + len(word) < 20:
+                        row4 = row4 + word + " "
+                    else:
+                        currentRow += 1
+                
             lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
             lcd.clear()
-            lcd.printline(0, deal.center(cols))
+            lcd.printline(0, row1)
+            lcd.printline(1, row2)
+            lcd.printline(2, row3)
+            lcd.printline(3, row4)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
 
 while True:
