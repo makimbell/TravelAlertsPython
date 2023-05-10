@@ -60,8 +60,42 @@ def display_deal_list(deal_list):
         if config.DEVICE_CONNECTED:
             cols = 20
             rows = 4
+
+            currentRow = 1
+            row1 = ""
+            row2 = ""
+            row3 = ""
+            row4 = ""
+
+            dealWords = deal.split()
+            for word in dealWords:
+                if currentRow == 1:
+                    if len(row1) + len(word) < 20:
+                        row1 = row1 + word + " "
+                    else:
+                        currentRow += 1
+                if currentRow == 2:
+                    if len(row2) + len(word) < 20:
+                        row2 = row2 + word + " "
+                    else:
+                        currentRow += 1
+                if currentRow == 3:
+                    if len(row3) + len(word) < 20:
+                        row3 = row3 + word + " "
+                    else:
+                        currentRow += 1
+                if currentRow == 4:
+                    if len(row4) + len(word) < 20:
+                        row4 = row4 + word + " "
+                    else:
+                        currentRow += 1
+                
             lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
-            lcd.printline(0, deal)
+            lcd.clear()
+            lcd.printline(0, row1)
+            lcd.printline(1, row2)
+            lcd.printline(2, row3)
+            lcd.printline(3, row4)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
 
 while True:
