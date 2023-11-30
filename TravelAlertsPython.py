@@ -137,5 +137,5 @@ else:
         print("No internet")
     if config.DEVICE_CONNECTED:
         lcd.clear()
-        lcd.printline(1, "No internet")
-        lcd.printline(2, "Tell Andy")
+        lcd.printline(1, "No internet!")
+        lcd.printline(2, "Tell Andy!")
