@@ -9,6 +9,7 @@ from email.header import decode_header
 import config
 if config.DEVICE_CONNECTED:
     import liquidcrystal_i2c
+    lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
 
 last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 server = 'imap.gmail.com'
@@ -92,7 +93,6 @@ def display_deal_list(deal_list):
                     else:
                         currentRow += 1
                 
-            lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
             lcd.clear()
             lcd.printline(0, row1)
             lcd.printline(1, row2)
@@ -114,7 +114,6 @@ if checkInternetConnection():
     if config.DEBUG:
         print("Internet Connected")
     if config.DEVICE_CONNECTED:
-        lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
         lcd.clear()
         lcd.printline(0, "Internet Connected")
     
@@ -137,7 +136,6 @@ else:
     if config.DEBUG:
         print("No internet")
     if config.DEVICE_CONNECTED:
-        lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
         lcd.clear()
         lcd.printline(0, "No internet")
         lcd.printline(1, "Tell Andy")
