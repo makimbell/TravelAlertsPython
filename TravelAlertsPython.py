@@ -11,11 +11,9 @@ if config.DEVICE_CONNECTED:
     import liquidcrystal_i2c
     lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
 
-last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
-server = 'imap.gmail.com'
-
 def fetch_mail():
     # Connect to the IMAP server
+    server = 'imap.gmail.com'
     imap_server = imaplib.IMAP4_SSL(server)
     imap_server.login(config.EMAIL_ADDRESS, config.PASSWORD)
 
@@ -109,6 +107,7 @@ def checkInternetConnection(url="www.google.com", timeout=3):
     except:
         return False
 
+# MAIN
 if checkInternetConnection():
     if config.DEBUG:
         print("Internet Connected")
@@ -118,6 +117,9 @@ if checkInternetConnection():
         lcd.printline(2, "Connected")
     
     time.sleep(config.DISPLAY_TIMER_SECONDS)
+
+    # Initialize last_fetched_time for this session. Refresh when you do a new fetch
+    last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 
     while True:
         if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
