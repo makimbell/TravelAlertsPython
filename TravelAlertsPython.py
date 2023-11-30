@@ -4,6 +4,7 @@ import re
 import time
 import html
 import datetime
+import http.client as httplib
 from email.header import decode_header
 import config
 if config.DEVICE_CONNECTED:
@@ -71,22 +72,22 @@ def display_deal_list(deal_list):
             dealWords = deal.split()
             for word in dealWords:
                 if currentRow == 1:
-                    if len(row1) + len(word) < 20:
+                    if len(row1) + len(word) < cols:
                         row1 = row1 + word + " "
                     else:
                         currentRow += 1
                 if currentRow == 2:
-                    if len(row2) + len(word) < 20:
+                    if len(row2) + len(word) < cols:
                         row2 = row2 + word + " "
                     else:
                         currentRow += 1
                 if currentRow == 3:
-                    if len(row3) + len(word) < 20:
+                    if len(row3) + len(word) < cols:
                         row3 = row3 + word + " "
                     else:
                         currentRow += 1
                 if currentRow == 4:
-                    if len(row4) + len(word) < 20:
+                    if len(row4) + len(word) < cols:
                         row4 = row4 + word + " "
                     else:
                         currentRow += 1
@@ -99,22 +100,44 @@ def display_deal_list(deal_list):
             lcd.printline(3, row4)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
 
-# TODO: Test for internet connection. 
-# Display result
-# If connected, move on to while True loop
-# If not connected, display that (forever?)
+def checkInternetConnection(url="www.google.com", timeout=3):
+    connection = httplib.HTTPConnection(url, timeout=timeout)
 
-while True:
+    try:
+        connection.request("HEAD", "/")
+        connection.close()
+        return True
+    except:
+        return False
 
-    if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
-        if config.DEBUG:
-            print("Fetching mail")
-        message_body = fetch_mail()
-        last_fetched_time = datetime.datetime.now()
-    else:
-        if config.DEBUG:
-            print("Skipping mail fetch because mail was fetched within 1 day")
+if checkInternetConnection():
+    if config.DEBUG:
+        print("Internet Connected")
+    if config.DEVICE_CONNECTED:
+        lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
+        lcd.clear()
+        lcd.printline(0, "Internet Connected")
+    
+    time.sleep(config.DISPLAY_TIMER_SECONDS)
 
-    filtered_matches = filter_matches()
+    while True:
+        if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
+            if config.DEBUG:
+                print("Fetching mail")
+            message_body = fetch_mail()
+            last_fetched_time = datetime.datetime.now()
+        else:
+            if config.DEBUG:
+                print("Skipping mail fetch because mail was fetched within 1 day")
 
-    display_deal_list(filtered_matches)
+        filtered_matches = filter_matches()
+
+        display_deal_list(filtered_matches)
+else:
+    if config.DEBUG:
+        print("No internet")
+    if config.DEVICE_CONNECTED:
+        lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
+        lcd.clear()
+        lcd.printline(0, "No internet")
+        lcd.printline(1, "Tell Andy")
