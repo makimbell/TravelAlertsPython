@@ -62,7 +62,6 @@ def display_deal_list(deal_list):
             print(deal)
         if config.DEVICE_CONNECTED:
             cols = 20
-            rows = 4
 
             currentRow = 1
             row1 = ""
@@ -115,7 +114,8 @@ if checkInternetConnection():
         print("Internet Connected")
     if config.DEVICE_CONNECTED:
         lcd.clear()
-        lcd.printline(0, "Internet Connected")
+        lcd.printline(1, "Internet")
+        lcd.printline(2, "Connected")
     
     time.sleep(config.DISPLAY_TIMER_SECONDS)
 
@@ -137,5 +137,5 @@ else:
         print("No internet")
     if config.DEVICE_CONNECTED:
         lcd.clear()
-        lcd.printline(0, "No internet")
-        lcd.printline(1, "Tell Andy")
+        lcd.printline(1, "No internet")
+        lcd.printline(2, "Tell Andy")
