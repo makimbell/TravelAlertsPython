@@ -99,6 +99,11 @@ def display_deal_list(deal_list):
             lcd.printline(3, row4)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
 
+# TODO: Test for internet connection. 
+# Display result
+# If connected, move on to while True loop
+# If not connected, display that (forever?)
+
 while True:
 
     if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
