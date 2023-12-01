@@ -9,7 +9,7 @@ from email.header import decode_header
 import config
 if config.DEVICE_CONNECTED:
     import liquidcrystal_i2c
-    lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
+    LCD = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
 
 def fetch_mail():
     # Connect to the IMAP server
@@ -40,10 +40,10 @@ def fetch_mail():
 
     return target_message_body
 
-def filter_matches():
+def parse_email(message):
     # Use regex to find the deals that are formatted like we expect
     pattern = r'\$.+?(?=\s<)'
-    matches = re.findall(pattern, message_body)
+    matches = re.findall(pattern, message)
 
     filtered_matches = []
 
@@ -90,11 +90,11 @@ def display_deal_list(deal_list):
                     else:
                         currentRow += 1
                 
-            lcd.clear()
-            lcd.printline(0, row1)
-            lcd.printline(1, row2)
-            lcd.printline(2, row3)
-            lcd.printline(3, row4)
+            LCD.clear()
+            LCD.printline(0, row1)
+            LCD.printline(1, row2)
+            LCD.printline(2, row3)
+            LCD.printline(3, row4)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
 
 def checkInternetConnection(url="www.google.com", timeout=3):
@@ -107,37 +107,43 @@ def checkInternetConnection(url="www.google.com", timeout=3):
     except:
         return False
 
-# MAIN
-if checkInternetConnection():
-    if config.DEBUG:
-        print("Internet Connected")
-    if config.DEVICE_CONNECTED:
-        lcd.clear()
-        lcd.printline(1, "Internet")
-        lcd.printline(2, "Connected")
-    
-    time.sleep(config.DISPLAY_TIMER_SECONDS)
+def main():
+    if checkInternetConnection():
+        if config.DEBUG:
+            print("Internet Connected")
+        if config.DEVICE_CONNECTED:
+            LCD.clear()
+            LCD.printline(1, "Internet")
+            LCD.printline(2, "Connected")
+        
+        time.sleep(config.DISPLAY_TIMER_SECONDS)
 
-    # Initialize last_fetched_time for this session. Refresh when you do a new fetch
-    last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
+        # Initialize last_fetched_time for this session. Refresh when you do a new fetch
+        last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 
-    while True:
-        if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
-            if config.DEBUG:
-                print("Fetching mail")
-            message_body = fetch_mail()
-            last_fetched_time = datetime.datetime.now()
-        else:
-            if config.DEBUG:
-                print("Skipping mail fetch because mail was fetched within 1 day")
+        while True:
+            if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
+                if config.DEBUG:
+                    print("Fetching mail")
+                message_body = fetch_mail()
+                last_fetched_time = datetime.datetime.now()
+            else:
+                if config.DEBUG:
+                    print("Skipping mail fetch because mail was fetched within 1 day")
 
-        filtered_matches = filter_matches()
+            filtered_matches = parse_email(message_body)
 
-        display_deal_list(filtered_matches)
-else:
-    if config.DEBUG:
-        print("No internet")
-    if config.DEVICE_CONNECTED:
-        lcd.clear()
-        lcd.printline(1, "No internet!")
-        lcd.printline(2, "Tell Andy!")
+            display_deal_list(filtered_matches)
+    else:
+        if config.DEBUG:
+            print("No internet")
+        if config.DEVICE_CONNECTED:
+            LCD.clear()
+            LCD.printline(1, "No internet!")
+            LCD.printline(2, "Tell Andy!")
+
+
+
+####### START #######
+if __name__ == "__main__":
+    main()
