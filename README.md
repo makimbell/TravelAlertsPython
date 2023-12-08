@@ -13,3 +13,5 @@ DEBUG = True
 DISPLAY_TIMER_SECONDS = 5
 DEVICE_CONNECTED = False
 ```
+
+And also you need to sign that email address up for TravelZoo emails. And optionally, get a 4x20 LCD screen and hook it up to the R Pi.

@@ -4,16 +4,16 @@ import re
 import time
 import html
 import datetime
+import http.client as httplib
 from email.header import decode_header
 import config
 if config.DEVICE_CONNECTED:
     import liquidcrystal_i2c
-
-last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
-server = 'imap.gmail.com'
+    LCD = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
 
 def fetch_mail():
     # Connect to the IMAP server
+    server = 'imap.gmail.com'
     imap_server = imaplib.IMAP4_SSL(server)
     imap_server.login(config.EMAIL_ADDRESS, config.PASSWORD)
 
@@ -40,10 +40,10 @@ def fetch_mail():
 
     return target_message_body
 
-def filter_matches():
+def parse_email(message):
     # Use regex to find the deals that are formatted like we expect
     pattern = r'\$.+?(?=\s<)'
-    matches = re.findall(pattern, message_body)
+    matches = re.findall(pattern, message)
 
     filtered_matches = []
 
@@ -60,7 +60,6 @@ def display_deal_list(deal_list):
             print(deal)
         if config.DEVICE_CONNECTED:
             cols = 20
-            rows = 4
 
             currentRow = 1
             row1 = ""
@@ -71,45 +70,80 @@ def display_deal_list(deal_list):
             dealWords = deal.split()
             for word in dealWords:
                 if currentRow == 1:
-                    if len(row1) + len(word) < 20:
+                    if len(row1) + len(word) < cols:
                         row1 = row1 + word + " "
                     else:
                         currentRow += 1
                 if currentRow == 2:
-                    if len(row2) + len(word) < 20:
+                    if len(row2) + len(word) < cols:
                         row2 = row2 + word + " "
                     else:
                         currentRow += 1
                 if currentRow == 3:
-                    if len(row3) + len(word) < 20:
+                    if len(row3) + len(word) < cols:
                         row3 = row3 + word + " "
                     else:
                         currentRow += 1
                 if currentRow == 4:
-                    if len(row4) + len(word) < 20:
+                    if len(row4) + len(word) < cols:
                         row4 = row4 + word + " "
                     else:
                         currentRow += 1
                 
-            lcd = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=rows)
-            lcd.clear()
-            lcd.printline(0, row1)
-            lcd.printline(1, row2)
-            lcd.printline(2, row3)
-            lcd.printline(3, row4)
+            LCD.clear()
+            LCD.printline(0, row1)
+            LCD.printline(1, row2)
+            LCD.printline(2, row3)
+            LCD.printline(3, row4)
         time.sleep(config.DISPLAY_TIMER_SECONDS)
 
-while True:
+def checkInternetConnection(url="www.google.com", timeout=3):
+    connection = httplib.HTTPConnection(url, timeout=timeout)
 
-    if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
+    try:
+        connection.request("HEAD", "/")
+        connection.close()
+        return True
+    except:
+        return False
+
+def main():
+    if checkInternetConnection():
         if config.DEBUG:
-            print("Fetching mail")
-        message_body = fetch_mail()
-        last_fetched_time = datetime.datetime.now()
+            print("Internet Connected")
+        if config.DEVICE_CONNECTED:
+            LCD.clear()
+            LCD.printline(1, "Internet")
+            LCD.printline(2, "Connected")
+        
+        time.sleep(config.DISPLAY_TIMER_SECONDS)
+
+        # Initialize last_fetched_time for this session. Refresh when you do a new fetch
+        last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
+
+        while True:
+            if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
+                if config.DEBUG:
+                    print("Fetching mail")
+                message_body = fetch_mail()
+                last_fetched_time = datetime.datetime.now()
+            else:
+                if config.DEBUG:
+                    print("Skipping mail fetch because mail was fetched within 1 day")
+
+            filtered_matches = parse_email(message_body)
+
+            display_deal_list(filtered_matches)
     else:
         if config.DEBUG:
-            print("Skipping mail fetch because mail was fetched within 1 day")
+            print("No internet")
+        if config.DEVICE_CONNECTED:
+            LCD.clear()
+            LCD.printline(1, "No internet!")
+            LCD.printline(2, "Tell Andy!")
 
-    filtered_matches = filter_matches()
 
-    display_deal_list(filtered_matches)
+
+####### START #######
+if __name__ == "__main__":
+    main()
