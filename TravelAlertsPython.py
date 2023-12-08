@@ -67,6 +67,7 @@ def display_deal_list(deal_list):
             row3 = ""
             row4 = ""
 
+            # Split deal text into lines that fit onto the LCD display
             dealWords = deal.split()
             for word in dealWords:
                 if currentRow == 1:
@@ -122,6 +123,7 @@ def main():
         last_fetched_time = datetime.datetime.now() - datetime.timedelta(days=5)
 
         while True:
+            # Fetch mail at most once per day per session
             if datetime.datetime.now() - last_fetched_time > datetime.timedelta(days=1):
                 if config.DEBUG:
                     print("Fetching mail")
