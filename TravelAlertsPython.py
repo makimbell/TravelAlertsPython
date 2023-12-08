@@ -67,6 +67,7 @@ def display_deal_list(deal_list):
             row3 = ""
             row4 = ""
 
+            # Split deal text into lines that fit onto the LCD display
             dealWords = deal.split()
             for word in dealWords:
                 if currentRow == 1:
